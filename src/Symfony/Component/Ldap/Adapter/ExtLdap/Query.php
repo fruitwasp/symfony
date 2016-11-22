@@ -25,9 +25,16 @@ class Query extends AbstractQuery
     /** @var resource */
     private $search;
 
+    /** @var Paginator */
+    private $paginator;
+
     public function __construct(Connection $connection, $dn, $query, array $options = array())
     {
         parent::__construct($connection, $dn, $query, $options);
+
+        if ($this->options['pagination']) {
+            $this->paginator = new Paginator($connection, $this, $options);
+        }
     }
 
     public function __destruct()
@@ -52,6 +59,10 @@ class Query extends AbstractQuery
      */
     public function execute()
     {
+        if ($this->paginator instanceof Paginator) {
+            return $this->paginator->execute();
+        }
+
         if (null === $this->search) {
             // If the connection is not bound, then we try an anonymous bind.
             if (!$this->connection->isBound()) {
